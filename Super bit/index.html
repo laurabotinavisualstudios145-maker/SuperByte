@@ -2,7 +2,11 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#070913" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>SUPER BYTE — Un salto hacia una nueva aventura digital</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -44,11 +48,14 @@
         </div>
 
         <div class="hud-actions">
+          <button id="btn-hud-fullscreen" type="button" class="icon-btn" title="Pantalla Completa">
+            ⛶ <span class="btn-text-desktop">Pantalla</span>
+          </button>
           <button id="btn-hud-restart" type="button" class="icon-btn" title="Reiniciar Nivel">
-            ↻ Reiniciar
+            ↻ <span class="btn-text-desktop">Reiniciar</span>
           </button>
           <button id="btn-hud-pause" type="button" class="icon-btn" title="Pausar (ESC)">
-            ❚❚ Pausa
+            ❚❚ <span class="btn-text-desktop">Pausa</span>
           </button>
         </div>
       </header>
@@ -59,15 +66,27 @@
         <p id="toast-sub">Valle de Circuitos</p>
       </div>
 
-      <!-- Controles táctiles opcionales -->
-      <div id="touch-controls" class="touch-controls">
-        <div class="touch-cluster">
-          <button id="touch-left" type="button" class="touch-btn" aria-label="Izquierda">◀</button>
-          <button id="touch-right" type="button" class="touch-btn" aria-label="Derecha">▶</button>
+      <!-- Controles táctiles para celular / tablet -->
+      <div id="touch-controls" class="touch-controls" aria-label="Controles táctiles">
+        <div class="touch-cluster touch-dpad">
+          <button id="touch-left" type="button" class="touch-btn" data-touch-key="left" aria-label="Izquierda">
+            <span class="touch-icon">◀</span>
+            <span class="touch-label">IZQ</span>
+          </button>
+          <button id="touch-right" type="button" class="touch-btn" data-touch-key="right" aria-label="Derecha">
+            <span class="touch-icon">▶</span>
+            <span class="touch-label">DER</span>
+          </button>
         </div>
-        <div class="touch-cluster">
-          <button id="touch-run" type="button" class="touch-btn" aria-label="Correr">⚡</button>
-          <button id="touch-jump" type="button" class="touch-btn" aria-label="Saltar">▲</button>
+        <div class="touch-cluster touch-actions">
+          <button id="touch-run" type="button" class="touch-btn touch-btn-run" data-touch-key="run" aria-label="Correr Turbo">
+            <span class="touch-icon">⚡</span>
+            <span class="touch-label">TURBO</span>
+          </button>
+          <button id="touch-jump" type="button" class="touch-btn touch-btn-jump" data-touch-key="jump" aria-label="Saltar">
+            <span class="touch-icon">▲</span>
+            <span class="touch-label">SALTAR</span>
+          </button>
         </div>
       </div>
 

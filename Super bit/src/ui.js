@@ -39,6 +39,7 @@
     let activeAlgebraState = null;
 
     let toastTimer = null;
+    const touchControls = document.getElementById("touch-controls");
 
     function showOverlay(name) {
       Object.keys(overlays).forEach((key) => {
@@ -48,6 +49,9 @@
           overlays[key].classList.add("hidden");
         }
       });
+      if (touchControls) {
+        touchControls.classList.toggle("overlay-active", name !== null);
+      }
     }
 
     function showLevelToast(level) {
@@ -268,6 +272,34 @@
     });
 
     // HUD Actions
+    const btnFullscreen = document.getElementById("btn-hud-fullscreen");
+    if (btnFullscreen) {
+      btnFullscreen.addEventListener("click", async () => {
+        window.SuperByte.audio.uiClick();
+        const docEl = document.documentElement;
+        try {
+          if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            if (docEl.requestFullscreen) {
+              await docEl.requestFullscreen();
+            } else if (docEl.webkitRequestFullscreen) {
+              docEl.webkitRequestFullscreen();
+            }
+            if (screen.orientation && screen.orientation.lock) {
+              screen.orientation.lock("landscape").catch(() => {});
+            }
+          } else {
+            if (document.exitFullscreen) {
+              await document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+              document.webkitExitFullscreen();
+            }
+          }
+        } catch (_) {
+          // Ignore fullscreen permission errors on restricted webviews
+        }
+      });
+    }
+
     document.getElementById("btn-hud-pause").addEventListener("click", () => {
       engine.togglePause();
     });
@@ -309,7 +341,33 @@
     const sliderSfx = document.getElementById("slider-sfx");
     const btnCrt = document.getElementById("btn-toggle-crt");
     const btnTouch = document.getElementById("btn-toggle-touch");
-    const touchControls = document.getElementById("touch-controls");
+
+    function setTouchControlsVisible(visible) {
+      touchControls.classList.toggle("visible", visible);
+      btnTouch.classList.toggle("active", visible);
+      btnTouch.textContent = visible ? "VISIBLES" : "OCULTOS";
+    }
+
+    // Auto-enable touch controls on mobile & tablet devices
+    const isTouchDevice =
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.matchMedia("(pointer: coarse)").matches ||
+      window.innerWidth <= 900;
+
+    setTouchControlsVisible(isTouchDevice);
+    touchControls.classList.add("overlay-active");
+
+    // Unlock Web Audio on first mobile touch interaction
+    const unlockAudioOnce = () => {
+      if (window.SuperByte.audio) {
+        window.SuperByte.audio.ensureContext();
+      }
+      window.removeEventListener("touchstart", unlockAudioOnce);
+      window.removeEventListener("pointerdown", unlockAudioOnce);
+    };
+    window.addEventListener("touchstart", unlockAudioOnce, { passive: true });
+    window.addEventListener("pointerdown", unlockAudioOnce, { passive: true });
 
     sliderMusic.addEventListener("input", (e) => {
       window.SuperByte.audio.musicVolume = Number(e.target.value) / 100;
@@ -330,41 +388,77 @@
 
     btnTouch.addEventListener("click", () => {
       window.SuperByte.audio.uiClick();
-      touchControls.classList.toggle("visible");
-      const active = touchControls.classList.contains("visible");
-      btnTouch.classList.toggle("active", active);
-      btnTouch.textContent = active ? "VISIBLES" : "OCULTOS";
+      const nextState = !touchControls.classList.contains("visible");
+      setTouchControlsVisible(nextState);
     });
 
-    // Bind On-Screen Touch Buttons
-    function bindHoldButton(btnId, keyProp, isJump = false) {
-      const el = document.getElementById(btnId);
+    // Multi-touch + thumb slide controller for mobile phones
+    const touchBtns = {
+      left: document.getElementById("touch-left"),
+      right: document.getElementById("touch-right"),
+      run: document.getElementById("touch-run"),
+      jump: document.getElementById("touch-jump")
+    };
+
+    function applyTouchKeyStates(activeSet) {
+      ["left", "right", "run", "jump"].forEach((key) => {
+        const isPressed = activeSet.has(key);
+        if (key === "jump" && isPressed && !engine.keys.jump) {
+          engine.keys.jumpJustPressed = true;
+        }
+        engine.keys[key] = isPressed;
+        if (touchBtns[key]) {
+          touchBtns[key].classList.toggle("pressed", isPressed);
+        }
+      });
+    }
+
+    function syncTouches(e) {
+      if (e.cancelable) e.preventDefault();
+      const activeSet = new Set();
+      for (let i = 0; i < e.touches.length; i++) {
+        const t = e.touches[i];
+        const el = document.elementFromPoint(t.clientX, t.clientY);
+        const btn = el && el.closest("[data-touch-key]");
+        if (btn) {
+          activeSet.add(btn.getAttribute("data-touch-key"));
+        }
+      }
+      applyTouchKeyStates(activeSet);
+    }
+
+    touchControls.addEventListener("touchstart", syncTouches, { passive: false });
+    touchControls.addEventListener("touchmove", syncTouches, { passive: false });
+    touchControls.addEventListener("touchend", syncTouches, { passive: false });
+    touchControls.addEventListener("touchcancel", syncTouches, { passive: false });
+    touchControls.addEventListener("contextmenu", (e) => e.preventDefault());
+
+    // Desktop mouse fallback when testing on-screen buttons with a mouse
+    Object.keys(touchBtns).forEach((keyProp) => {
+      const el = touchBtns[keyProp];
       if (!el) return;
 
-      const press = (e) => {
+      const pressMouse = (e) => {
+        if (e.pointerType === "touch") return;
         e.preventDefault();
         el.classList.add("pressed");
-        if (isJump && !engine.keys.jump) {
+        if (keyProp === "jump" && !engine.keys.jump) {
           engine.keys.jumpJustPressed = true;
         }
         engine.keys[keyProp] = true;
       };
 
-      const release = (e) => {
+      const releaseMouse = (e) => {
+        if (e.pointerType === "touch") return;
         e.preventDefault();
         el.classList.remove("pressed");
         engine.keys[keyProp] = false;
       };
 
-      el.addEventListener("pointerdown", press);
-      el.addEventListener("pointerup", release);
-      el.addEventListener("pointerleave", release);
-      el.addEventListener("pointercancel", release);
-    }
-
-    bindHoldButton("touch-left", "left");
-    bindHoldButton("touch-right", "right");
-    bindHoldButton("touch-run", "run");
-    bindHoldButton("touch-jump", "jump", true);
+      el.addEventListener("pointerdown", pressMouse);
+      el.addEventListener("pointerup", releaseMouse);
+      el.addEventListener("pointerleave", releaseMouse);
+      el.addEventListener("pointercancel", releaseMouse);
+    });
   });
 })();
