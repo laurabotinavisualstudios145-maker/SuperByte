@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SUPER BYTE — Un salto hacia una nueva aventura digital</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="crt-enabled">
+  <main class="app-shell">
+    <div class="game-frame">
+      <!-- Renderizado 2D en HTML5 Canvas -->
+      <canvas id="game-canvas" width="960" height="540" aria-label="Escenario de juego Super Byte"></canvas>
+
+      <!-- Barra de Interfaz (HUD) durante la partida -->
+      <header id="hud-bar" class="hud-bar hidden">
+        <div class="hud-group">
+          <div class="hud-stat">
+            <span class="hud-label">Vidas</span>
+            <div id="hud-lives" class="hud-value hud-lives" aria-live="polite"></div>
+          </div>
+          <div class="hud-stat">
+            <span class="hud-label">Bytes</span>
+            <div class="hud-value byte-counter">
+              <span>◈</span>
+              <span id="hud-bytes">00</span>
+            </div>
+          </div>
+          <div class="hud-stat">
+            <span class="hud-label">Nivel Actual</span>
+            <div id="hud-level" class="hud-value">Nivel 1: Byte Valley</div>
+          </div>
+          <div class="hud-stat">
+            <span class="hud-label">Puntuación</span>
+            <div id="hud-score" class="hud-value">000000</div>
+          </div>
+        </div>
+
+        <div class="hud-actions">
+          <button id="btn-hud-restart" type="button" class="icon-btn" title="Reiniciar Nivel">
+            ↻ Reiniciar
+          </button>
+          <button id="btn-hud-pause" type="button" class="icon-btn" title="Pausar (ESC)">
+            ❚❚ Pausa
+          </button>
+        </div>
+      </header>
+
+      <!-- Notificación de inicio de nivel -->
+      <div id="level-toast" class="level-toast hidden">
+        <h3 id="toast-title">Nivel 1: Byte Valley</h3>
+        <p id="toast-sub">Valle de Circuitos</p>
+      </div>
+
+      <!-- Controles táctiles opcionales -->
+      <div id="touch-controls" class="touch-controls">
+        <div class="touch-cluster">
+          <button id="touch-left" type="button" class="touch-btn" aria-label="Izquierda">◀</button>
+          <button id="touch-right" type="button" class="touch-btn" aria-label="Derecha">▶</button>
+        </div>
+        <div class="touch-cluster">
+          <button id="touch-run" type="button" class="touch-btn" aria-label="Correr">⚡</button>
+          <button id="touch-jump" type="button" class="touch-btn" aria-label="Saltar">▲</button>
+        </div>
+      </div>
+
+      <!-- ==================== PANTALLA PRINCIPAL ==================== -->
+      <section id="screen-main" class="screen-overlay">
+        <div class="menu-card">
+          <span class="logo-badge">ARCADE EDITION • 8/16-BIT</span>
+          <h1 class="game-logo">SUPER BYTE</h1>
+          <p class="game-motto">«Un salto hacia una nueva aventura digital»</p>
+
+          <div class="menu-buttons">
+            <button id="btn-play" type="button" class="arcade-btn primary">
+              ▶ JUGAR
+            </button>
+            <button id="btn-select-level" type="button" class="arcade-btn">
+              ◈ SELECCIONAR NIVEL
+            </button>
+            <button id="btn-instructions" type="button" class="arcade-btn">
+              ? INSTRUCCIONES
+            </button>
+            <button id="btn-config" type="button" class="arcade-btn secondary">
+              ⚙ CONFIGURACIÓN
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SELECCIONAR NIVEL ==================== -->
+      <section id="screen-levels" class="screen-overlay hidden">
+        <div class="menu-card">
+          <span class="logo-badge">MUNDOS DIGITALES</span>
+          <h2 class="game-logo" style="font-size: 2rem;">SELECCIONAR NIVEL</h2>
+          <p class="game-motto">Elige un sector del sistema para iniciar la misión</p>
+
+          <div id="level-grid" class="level-grid"></div>
+
+          <div class="menu-buttons">
+            <button type="button" class="arcade-btn" data-back-main>
+              ◀ VOLVER AL MENÚ
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== INSTRUCCIONES ==================== -->
+      <section id="screen-instructions" class="screen-overlay hidden">
+        <div class="menu-card">
+          <span class="logo-badge">MANUAL DE OPERACIÓN</span>
+          <h2 class="game-logo" style="font-size: 2rem;">INSTRUCCIONES</h2>
+
+          <div class="info-section">
+            <ul class="controls-list">
+              <li>
+                <span>Mover a la izquierda</span>
+                <span class="key-pill">← / A</span>
+              </li>
+              <li>
+                <span>Mover a la derecha</span>
+                <span class="key-pill">→ / D</span>
+              </li>
+              <li>
+                <span>Saltar</span>
+                <span class="key-pill">ESPACIO / W / ↑</span>
+              </li>
+              <li>
+                <span>Correr (Turbo)</span>
+                <span class="key-pill">SHIFT</span>
+              </li>
+              <li>
+                <span>Pausar partida</span>
+                <span class="key-pill">ESC</span>
+              </li>
+              <li>
+                <span>Bloques Sorpresa [?]</span>
+                <span class="key-pill">Golpear abajo</span>
+              </li>
+            </ul>
+
+            <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+              Guía a <strong style="color: var(--cyan-neon);">Byte</strong> hasta el
+              <strong style="color: var(--yellow-byte);">Portal de Salida</strong> de cada mundo.
+              Salta encima de los enemigos para derrotarlos y rebotar, y golpea bloques
+              <strong style="color: var(--yellow-byte);">[?]</strong> desde abajo para obtener bytes o corazones de vida extra.
+            </p>
+
+            <div class="enemy-legend">
+              <div class="legend-item">
+                <strong>Bug Walker</strong>
+                Escarabajo cibernético que patrulla plataformas.
+              </div>
+              <div class="legend-item">
+                <strong>Virus Bot</strong>
+                Dron centinela que acelera al detectarte cerca.
+              </div>
+              <div class="legend-item">
+                <strong>Glitch</strong>
+                Anomalía que aparece y desaparece periódicamente.
+              </div>
+            </div>
+          </div>
+
+          <div class="menu-buttons">
+            <button type="button" class="arcade-btn primary" data-back-main>
+              ◀ ENTENDIDO
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== CONFIGURACIÓN ==================== -->
+      <section id="screen-config" class="screen-overlay hidden">
+        <div class="menu-card">
+          <span class="logo-badge">AJUSTES DEL SISTEMA</span>
+          <h2 class="game-logo" style="font-size: 2rem;">CONFIGURACIÓN</h2>
+
+          <div class="info-section">
+            <div class="settings-row">
+              <span>Volumen de Música Retro</span>
+              <input id="slider-music" type="range" min="0" max="100" value="45" />
+            </div>
+            <div class="settings-row">
+              <span>Volumen Efectos de Sonido (SFX)</span>
+              <input id="slider-sfx" type="range" min="0" max="100" value="70" />
+            </div>
+            <div class="settings-row">
+              <span>Efecto Monitor Arcade CRT</span>
+              <button id="btn-toggle-crt" type="button" class="toggle-btn active">
+                ACTIVADO
+              </button>
+            </div>
+            <div class="settings-row">
+              <span>Controles Táctiles en Pantalla</span>
+              <button id="btn-toggle-touch" type="button" class="toggle-btn">
+                OCULTOS
+              </button>
+            </div>
+          </div>
+
+          <div class="menu-buttons">
+            <button type="button" class="arcade-btn primary" data-back-main>
+              ◀ GUARDAR Y VOLVER
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== PAUSA ==================== -->
+      <section id="screen-pause" class="screen-overlay hidden">
+        <div class="menu-card">
+          <span class="logo-badge">SISTEMA EN ESPERA</span>
+          <h2 class="game-logo" style="font-size: 2.3rem;">JUEGO EN PAUSA</h2>
+          <p class="game-motto">Presiona ESC o el botón para continuar la aventura</p>
+
+          <div class="menu-buttons">
+            <button id="btn-resume" type="button" class="arcade-btn primary">
+              ▶ CONTINUAR
+            </button>
+            <button id="btn-pause-restart" type="button" class="arcade-btn">
+              ↻ REINICIAR NIVEL
+            </button>
+            <button type="button" class="arcade-btn secondary" data-back-main>
+              ⌂ MENÚ PRINCIPAL
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VICTORIA DE NIVEL ==================== -->
+      <section id="screen-victory" class="screen-overlay hidden">
+        <div class="menu-card">
+          <span class="logo-badge">¡SECTOR COMPLETADO!</span>
+          <h2 class="game-logo" style="font-size: 2.2rem;">¡VICTORIA!</h2>
+          <p id="win-level-name" class="game-motto">Nivel 1: Byte Valley</p>
+
+          <div class="summary-grid">
+            <div class="summary-box">
+              <span>Bytes</span>
+              <strong id="win-bytes">0</strong>
+            </div>
+            <div class="summary-box">
+              <span>Bono Portal</span>
+              <strong>+1000</strong>
+            </div>
+            <div class="summary-box">
+              <span>Puntuación</span>
+              <strong id="win-score">0</strong>
+            </div>
+          </div>
+
+          <div class="menu-buttons">
+            <button id="btn-next-level" type="button" class="arcade-btn primary">
+              SIGUIENTE NIVEL ▶
+            </button>
+            <button id="btn-win-replay" type="button" class="arcade-btn">
+              ↻ REPETIR NIVEL
+            </button>
+            <button type="button" class="arcade-btn secondary" data-back-main>
+              ⌂ MENÚ PRINCIPAL
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== GAME OVER ==================== -->
+      <section id="screen-gameover" class="screen-overlay hidden">
+        <div class="menu-card">
+          <span class="logo-badge" style="color: var(--danger-red); border-color: var(--danger-red);">
+            ERROR CRÍTICO DE SISTEMA
+          </span>
+          <h2 class="game-logo" style="font-size: 2.5rem; color: var(--danger-red);">
+            GAME OVER
+          </h2>
+          <p id="over-level-name" class="game-motto">Has perdido todas tus vidas</p>
+
+          <div class="summary-grid">
+            <div class="summary-box">
+              <span>Bytes</span>
+              <strong id="over-bytes">0</strong>
+            </div>
+            <div class="summary-box">
+              <span>Vidas</span>
+              <strong style="color: var(--danger-red);">0</strong>
+            </div>
+            <div class="summary-box">
+              <span>Puntuación Final</span>
+              <strong id="over-score">0</strong>
+            </div>
+          </div>
+
+          <div class="menu-buttons">
+            <button id="btn-gameover-retry" type="button" class="arcade-btn primary">
+              ↻ REINTENTAR NIVEL
+            </button>
+            <button type="button" class="arcade-btn secondary" data-back-main>
+              ⌂ MENÚ PRINCIPAL
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Módulos de SUPER BYTE -->
+  <script src="src/audio.js"></script>
+  <script src="src/sprites.js"></script>
+  <script src="src/levels.js"></script>
+  <script src="src/game.js"></script>
+  <script src="src/ui.js"></script>
+</body>
+</html>
