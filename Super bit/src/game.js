@@ -116,6 +116,9 @@
       this.lives = 3;
       this.bytesCollected = 0;
       this.score = 0;
+      if (window.SuperByte.algebra) {
+        window.SuperByte.algebra.resetSessionStats();
+      }
       this.loadLevel(levelIndex, false);
       this.state = "PLAYING";
       window.SuperByte.audio.startMusic(this.level.themeIndex);
@@ -201,6 +204,8 @@
       this.floatingTexts = [];
       this.camera.x = 0;
       this.camera.y = 0;
+      this.lastSafePos = { x: this.level.spawn.x, y: this.level.spawn.y };
+      this.pendingDamageContext = null;
 
       if (!previewOnly) {
         this.notifyHUD();
@@ -227,7 +232,10 @@
           bytes: this.bytesCollected,
           score: this.score,
           levelNumber: this.level.id,
-          levelName: this.level.name
+          levelName: this.level.name,
+          algebraSolved: window.SuperByte.algebra
+            ? window.SuperByte.algebra.stats.solved
+            : 0
         });
       }
     }
@@ -307,23 +315,85 @@
 
     damagePlayer(instantKill = false) {
       const p = this.player;
-      if (p.dead) return;
+      if (p.dead || this.state !== "PLAYING") return;
       if (!instantKill && p.invulnTimer > 0) return;
 
+      // Trigger Algebra Second-Chance Challenge before losing a life
+      if (window.SuperByte.algebra && this.callbacks.onAlgebraChallenge) {
+        this.keys.left = false;
+        this.keys.right = false;
+        this.keys.jump = false;
+        this.keys.jumpJustPressed = false;
+        this.keys.run = false;
+
+        this.state = "ALGEBRA_CHALLENGE";
+        this.pendingDamageContext = { instantKill };
+        this.spawnParticles(p.x + p.w / 2, p.y + p.h / 2, "#ffd166", 14, 170);
+        window.SuperByte.audio.algebraPrompt();
+
+        const question = window.SuperByte.algebra.getQuestionForLevel(this.level.id);
+        this.callbacks.onAlgebraChallenge(question, {
+          lives: this.lives,
+          levelName: this.level.name,
+          instantKill
+        });
+        return;
+      }
+
+      this.applyLifeLoss(instantKill);
+    }
+
+    resolveAlgebraChallenge(savedLife) {
+      const ctx = this.pendingDamageContext || { instantKill: false };
+      this.pendingDamageContext = null;
+      const p = this.player;
+
+      if (savedLife) {
+        // Player solved the algebra question: keep the life, gain +250 pts and shield
+        this.score += 250;
+        if (ctx.instantKill) {
+          const safe = this.lastSafePos || this.level.spawn;
+          p.x = safe.x;
+          p.y = safe.y;
+          p.vx = 0;
+          p.vy = 0;
+          p.animState = "idle";
+        } else {
+          p.vy = -360;
+          p.vx = 0;
+        }
+        p.hurtTimer = 0;
+        p.invulnTimer = 2.4;
+        this.state = "PLAYING";
+        this.spawnParticles(p.x + p.w / 2, p.y + p.h / 2, "#00f5d4", 18, 210);
+        this.spawnFloatingText(p.x, p.y - 14, "¡VIDA SALVADA! +250", "#00f5d4");
+        this.notifyHUD();
+      } else {
+        this.state = "PLAYING";
+        this.applyLifeLoss(ctx.instantKill);
+      }
+    }
+
+    applyLifeLoss(instantKill = false) {
+      const p = this.player;
       this.lives = Math.max(0, this.lives - 1);
       this.notifyHUD();
       this.spawnParticles(p.x + p.w / 2, p.y + p.h / 2, "#ff3355", 16, 200);
 
-      if (this.lives <= 0 || instantKill) {
+      if (this.lives <= 0) {
         p.dead = true;
         p.deadTimer = 1.15;
         p.vy = -420;
         p.vx = 0;
         p.animState = "dead";
         window.SuperByte.audio.playerDie();
+      } else if (instantKill) {
+        window.SuperByte.audio.playerHurt();
+        this.respawnPlayerAfterFallOrDeath();
+        this.spawnFloatingText(this.player.x, this.player.y - 10, "-1 VIDA", "#ff3355");
       } else {
         p.hurtTimer = 0.35;
-        p.invulnTimer = 1.75;
+        p.invulnTimer = 1.85;
         p.vy = -340;
         p.vx = p.facingLeft ? 220 : -220;
         p.animState = "hurt";
@@ -398,7 +468,10 @@
               this.callbacks.onGameOver({
                 score: this.score,
                 bytes: this.bytesCollected,
-                levelName: this.level.name
+                levelName: this.level.name,
+                algebraSolved: window.SuperByte.algebra
+                  ? window.SuperByte.algebra.stats.solved
+                  : 0
               });
             }
           }
@@ -522,6 +595,12 @@
             p.onGround = true;
             if (s.minX !== undefined) {
               p.ridingPlatform = s;
+            } else if (
+              p.x >= s.x + 8 &&
+              p.x + p.w <= s.x + s.w - 8 &&
+              !this.level.hazards.some((hz) => aabbOverlap(p, hz))
+            ) {
+              this.lastSafePos = { x: p.x, y: p.y };
             }
           } else if (p.vy < 0) {
             p.y = s.y + s.h;
@@ -670,6 +749,9 @@
             levelName: this.level.name,
             bytes: this.bytesCollected,
             score: this.score,
+            algebraSolved: window.SuperByte.algebra
+              ? window.SuperByte.algebra.stats.solved
+              : 0,
             isFinalLevel: this.currentLevelIndex === window.SuperByte.LEVELS.length - 1
           });
         }

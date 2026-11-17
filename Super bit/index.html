@@ -27,6 +27,13 @@
             </div>
           </div>
           <div class="hud-stat">
+            <span class="hud-label">Álgebra</span>
+            <div class="hud-value algebra-counter">
+              <span>∑</span>
+              <span id="hud-algebra">0</span>
+            </div>
+          </div>
+          <div class="hud-stat">
             <span class="hud-label">Nivel Actual</span>
             <div id="hud-level" class="hud-value">Nivel 1: Byte Valley</div>
           </div>
@@ -144,6 +151,8 @@
               <strong style="color: var(--yellow-byte);">Portal de Salida</strong> de cada mundo.
               Salta encima de los enemigos para derrotarlos y rebotar, y golpea bloques
               <strong style="color: var(--yellow-byte);">[?]</strong> desde abajo para obtener bytes o corazones de vida extra.
+              Si estás por perder una vida, se activará el <strong style="color: var(--magenta-neon);">Escudo Algebraico (Segunda Oportunidad)</strong>:
+              resuelve la ecuación correctamente para conservar tu vida y sumar +250 puntos.
             </p>
 
             <div class="enemy-legend">
@@ -300,6 +309,43 @@
           </div>
         </div>
       </section>
+
+      <!-- ==================== SEGUNDA OPORTUNIDAD: DESAFÍO DE ÁLGEBRA ==================== -->
+      <section id="screen-algebra" class="screen-overlay hidden" aria-modal="true" role="dialog">
+        <div class="menu-card algebra-card">
+          <span class="logo-badge">SEGUNDA OPORTUNIDAD • ESCUDO ALGEBRAICO</span>
+          <h2 class="game-logo" style="font-size: 1.9rem; margin-bottom: 6px;">¡SALVA TU VIDA!</h2>
+          <p id="algebra-category" class="game-motto" style="margin-bottom: 12px;">
+            Nivel 1 • Ecuaciones Lineales Simples
+          </p>
+
+          <div class="algebra-box">
+            <p id="algebra-prompt" class="algebra-prompt">
+              Encuentra el valor de x que equilibra el circuito:
+            </p>
+            <div id="algebra-expression" class="algebra-expression">
+              2x + 4 = 10
+            </div>
+
+            <div class="algebra-hint-row">
+              <button id="btn-algebra-hint" type="button" class="hint-btn">
+                ? Ver pista paso a paso
+              </button>
+              <p id="algebra-hint-text" class="algebra-hint-text hidden"></p>
+            </div>
+          </div>
+
+          <div id="algebra-options" class="algebra-options-grid"></div>
+
+          <div id="algebra-feedback" class="algebra-feedback hidden">
+            <strong id="algebra-feedback-title" class="algebra-feedback-title"></strong>
+            <p id="algebra-feedback-explanation" class="algebra-feedback-explanation"></p>
+            <button id="btn-algebra-continue" type="button" class="arcade-btn primary" style="margin-top: 10px;">
+              ▶ CONTINUAR PARTIDA
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -307,6 +353,7 @@
   <script src="src/audio.js"></script>
   <script src="src/sprites.js"></script>
   <script src="src/levels.js"></script>
+  <script src="src/algebra.js"></script>
   <script src="src/game.js"></script>
   <script src="src/ui.js"></script>
 </body>

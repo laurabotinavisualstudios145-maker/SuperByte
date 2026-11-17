@@ -259,6 +259,42 @@
       });
     }
 
+    algebraPrompt() {
+      const notes = [440.0, 554.37, 659.25, 880.0];
+      notes.forEach((n, idx) => {
+        this.playTone({
+          freq: n,
+          type: "triangle",
+          duration: 0.09,
+          volume: 0.28,
+          delay: idx * 0.055
+        });
+      });
+    }
+
+    algebraSuccess() {
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((n, idx) => {
+        this.playTone({
+          freq: n,
+          type: "square",
+          duration: 0.11,
+          volume: 0.3,
+          delay: idx * 0.065
+        });
+      });
+    }
+
+    algebraFail() {
+      this.playTone({
+        freq: 220,
+        endFreq: 110,
+        type: "sawtooth",
+        duration: 0.28,
+        volume: 0.34
+      });
+    }
+
     // ==================== CHIPTUNE MUSIC SEQUENCER ====================
 
     startMusic(themeIndex = 0) {

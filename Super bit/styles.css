@@ -604,11 +604,186 @@ body.crt-enabled::after {
   color: #050711;
 }
 
+/* ==================== ALGEBRA SECOND-CHANCE MODAL ==================== */
+.hud-value.algebra-counter {
+  color: var(--cyan-neon);
+}
+
+.algebra-card {
+  max-width: 580px;
+  padding: 22px 26px;
+}
+
+.algebra-box {
+  background: rgba(7, 10, 24, 0.85);
+  border: 2px solid rgba(0, 245, 212, 0.45);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.algebra-prompt {
+  font-size: 0.9rem;
+  color: var(--text-main);
+  margin-bottom: 10px;
+}
+
+.algebra-expression {
+  font-size: clamp(1.35rem, 3vw, 1.85rem);
+  font-weight: 900;
+  color: var(--yellow-byte);
+  background: rgba(19, 25, 56, 0.95);
+  border: 2px dashed var(--cyan-neon);
+  border-radius: 8px;
+  padding: 10px 14px;
+  letter-spacing: 0.08em;
+  text-shadow: 0 2px 0 #000, 0 0 12px rgba(255, 209, 102, 0.45);
+  margin-bottom: 10px;
+}
+
+.algebra-hint-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.hint-btn {
+  background: transparent;
+  color: var(--cyan-neon);
+  border: 1px solid var(--cyan-neon);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-family: var(--font-pixel);
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.hint-btn:hover,
+.hint-btn:focus-visible {
+  background: rgba(0, 245, 212, 0.2);
+  outline: none;
+}
+
+.algebra-hint-text {
+  font-size: 0.8rem;
+  color: var(--yellow-byte);
+  background: rgba(255, 209, 102, 0.1);
+  border-left: 3px solid var(--yellow-byte);
+  padding: 6px 10px;
+  border-radius: 4px;
+  width: 100%;
+  text-align: left;
+  line-height: 1.35;
+}
+
+.algebra-hint-text.hidden,
+.algebra-feedback.hidden {
+  display: none;
+}
+
+.algebra-options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.algebra-option-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  font-family: var(--font-pixel);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-main);
+  background: linear-gradient(180deg, #1d2754 0%, #101633 100%);
+  border: 2px solid var(--cyan-dim);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.algebra-option-btn:hover:not(:disabled),
+.algebra-option-btn:focus-visible:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--yellow-byte);
+  outline: none;
+}
+
+.algebra-option-btn:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.algebra-option-btn.correct {
+  background: linear-gradient(180deg, #00b894 0%, #007f66 100%);
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(0, 245, 212, 0.55);
+}
+
+.algebra-option-btn.wrong {
+  background: linear-gradient(180deg, #d90429 0%, #8d0801 100%);
+  border-color: var(--danger-red);
+  color: #ffffff;
+}
+
+.algebra-key-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--cyan-neon);
+  color: var(--yellow-byte);
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+.algebra-feedback {
+  background: rgba(7, 10, 24, 0.92);
+  border: 2px solid var(--cyan-neon);
+  border-radius: 10px;
+  padding: 12px 14px;
+  text-align: center;
+}
+
+.algebra-feedback.is-wrong {
+  border-color: var(--danger-red);
+}
+
+.algebra-feedback-title {
+  display: block;
+  font-size: 0.98rem;
+  margin-bottom: 6px;
+  color: var(--cyan-neon);
+}
+
+.algebra-feedback.is-wrong .algebra-feedback-title {
+  color: var(--danger-red);
+}
+
+.algebra-feedback-explanation {
+  font-size: 0.82rem;
+  color: var(--text-main);
+  line-height: 1.4;
+}
+
 @media (max-width: 760px) {
   .controls-list {
     grid-template-columns: 1fr;
   }
   .enemy-legend {
+    grid-template-columns: 1fr;
+  }
+  .algebra-options-grid {
     grid-template-columns: 1fr;
   }
   .menu-card {
