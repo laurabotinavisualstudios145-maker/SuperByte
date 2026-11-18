@@ -102,6 +102,13 @@
         rectTiles(50, 10, 2, 2, "pipe"),
         rectTiles(74, 10, 2, 2, "pipe"),
 
+        // Plataformas de Rebote (Trampolines Cibernéticos)
+        rectTiles(17.2, 11.5, 1.3, 0.5, "bounce"),
+        rectTiles(24.0, 11.5, 1.3, 0.5, "bounce"),
+        rectTiles(32.8, 11.5, 1.4, 0.5, "bounce"),
+        rectTiles(38.2, 11.5, 1.3, 0.5, "bounce"),
+        rectTiles(52.3, 11.5, 1.4, 0.5, "bounce"),
+
         // Final staircase before the exit portal
         rectTiles(78, 11, 4, 1, "step"),
         rectTiles(79, 10, 3, 1, "step"),
@@ -203,6 +210,14 @@
         rectTiles(36, 9, 2, 3, "pipe"),
         rectTiles(58, 9, 2, 3, "pipe"),
         rectTiles(85, 10, 2, 2, "pipe"),
+
+        // Plataformas de Rebote (Trampolines Cibernéticos)
+        rectTiles(6.5, 11.5, 1.3, 0.5, "bounce"),
+        rectTiles(25.2, 11.5, 1.3, 0.5, "bounce"),
+        rectTiles(34.2, 11.5, 1.3, 0.5, "bounce"),
+        rectTiles(46.2, 11.5, 1.3, 0.5, "bounce"),
+        rectTiles(56.2, 11.5, 1.3, 0.5, "bounce"),
+        rectTiles(69.2, 11.5, 1.3, 0.5, "bounce"),
 
         // Exit steps
         rectTiles(89, 11, 3, 1, "step"),
@@ -340,12 +355,18 @@
         rectTiles(67, 8.5, 4, 0.6, "platform"),
         rectTiles(73, 6, 4, 0.6, "platform"),
 
-        // Industrial Reactor Pipes
-        rectTiles(12, 10, 2, 2, "pipe"),
-        rectTiles(32, 9, 2, 3, "pipe"),
-        rectTiles(54, 9, 2, 3, "pipe"),
-        rectTiles(76, 9, 2, 3, "pipe"),
-        rectTiles(90, 10, 2, 2, "pipe"),
+        // Industrial Reactor Pipes (alturas ajustadas: 52px y 64px)
+        rectTiles(12, 10.7, 2, 1.3, "pipe"),
+        rectTiles(32, 10.4, 2, 1.6, "pipe"),
+        rectTiles(54, 10.4, 2, 1.6, "pipe"),
+        rectTiles(76, 10.4, 2, 1.6, "pipe"),
+        rectTiles(90, 10.4, 2, 1.6, "pipe"),
+
+        // Plataformas de Rebote (Trampolines Cibernéticos)
+        rectTiles(7.2, 11.5, 1.3, 0.5, "bounce"),
+        rectTiles(21.2, 11.5, 1.3, 0.5, "bounce"),
+        rectTiles(43.2, 11.5, 1.3, 0.5, "bounce"),
+        rectTiles(65.2, 11.5, 1.3, 0.5, "bounce"),
 
         // Final Victory Ascent
         rectTiles(94, 11, 5, 1, "step"),

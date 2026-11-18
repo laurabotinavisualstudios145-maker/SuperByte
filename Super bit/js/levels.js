@@ -236,10 +236,10 @@ window.SUPER_BYTE_LEVELS = {
       { x: 3600, y: 352, type: 'surprise', reward: 'multibyte' }
     ],
     pipes: [
-      { x: 490, h: 80 },
-      { x: 1300, h: 96 },
-      { x: 2150, h: 96 },
-      { x: 3080, h: 96 }
+      { x: 490, h: 52 },
+      { x: 1300, h: 64 },
+      { x: 2150, h: 64 },
+      { x: 3080, h: 64 }
     ],
     hazards: [
       { x: 300, y: 464, w: 96 },

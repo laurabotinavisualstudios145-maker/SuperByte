@@ -539,8 +539,9 @@
       // 6. Jump Execution & Variable Jump Height
       if (p.jumpBuffer > 0 && p.coyoteTimer > 0) {
         const runBoost = Math.abs(p.vx) > 260 ? -35 : 0;
-        p.vy = -575 + runBoost;
+        p.vy = -605 + runBoost;
         p.onGround = false;
+        p.bouncing = false;
         p.coyoteTimer = 0;
         p.jumpBuffer = 0;
         p.ridingPlatform = null;
@@ -548,9 +549,12 @@
         this.spawnParticles(p.x + p.w / 2, p.y + p.h, "#4cc9f0", 6, 95);
       }
 
-      // Cut jump velocity when releasing spacebar early for precise platforming
-      if (!this.keys.jump && p.vy < -220) {
+      // Cut jump velocity when releasing spacebar early for precise platforming (not during trampoline bounce)
+      if (!this.keys.jump && !p.bouncing && p.vy < -220) {
         p.vy *= 0.85;
+      }
+      if (p.vy >= 0) {
+        p.bouncing = false;
       }
 
       // Gravity
@@ -571,6 +575,7 @@
       }
 
       for (const s of solids) {
+        if (s.kind === "bounce") continue;
         if (aabbOverlap(p, s)) {
           if (p.vx > 0) {
             p.x = s.x - p.w;
@@ -589,10 +594,26 @@
 
       for (const s of solids) {
         if (aabbOverlap(p, s)) {
+          if (s.kind === "bounce") {
+            if (p.vy >= -80) {
+              p.y = s.y - p.h;
+              p.vy = -735;
+              p.onGround = false;
+              p.bouncing = true;
+              p.coyoteTimer = 0;
+              p.jumpBuffer = 0;
+              window.SuperByte.audio.jump();
+              this.spawnParticles(p.x + p.w / 2, s.y, "#ff2a85", 14, 210);
+              this.spawnFloatingText(s.x, s.y - 12, "¡REBOTE!", "#00f5d4");
+            }
+            continue;
+          }
+
           if (p.vy > 0) {
             p.y = s.y - p.h;
             p.vy = 0;
             p.onGround = true;
+            p.bouncing = false;
             if (s.minX !== undefined) {
               p.ridingPlatform = s;
             } else if (
@@ -882,6 +903,26 @@
           ctx.strokeStyle = "#070913";
           ctx.lineWidth = 2;
           ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+        } else if (plat.kind === "bounce") {
+          // Cyber Bounce Pad / Trampoline
+          const pulse = Math.sin(this.frameTick * 0.16) * 2;
+          // Base
+          ctx.fillStyle = "#1e293b";
+          ctx.fillRect(plat.x + 4, plat.y + 10, plat.w - 8, plat.h - 10);
+          // Spring coils
+          ctx.strokeStyle = "#00f5d4";
+          ctx.lineWidth = 2;
+          for (let cx = plat.x + 12; cx < plat.x + plat.w - 8; cx += 14) {
+            ctx.beginPath();
+            ctx.moveTo(cx, plat.y + 12);
+            ctx.lineTo(cx, plat.y + 4 + pulse);
+            ctx.stroke();
+          }
+          // Glowing top pad
+          ctx.fillStyle = "#ff2a85";
+          ctx.fillRect(plat.x, plat.y + pulse, plat.w, 8);
+          ctx.fillStyle = "#ffd166";
+          ctx.fillRect(plat.x + 6, plat.y + 2 + pulse, plat.w - 12, 3);
         }
       }
 
